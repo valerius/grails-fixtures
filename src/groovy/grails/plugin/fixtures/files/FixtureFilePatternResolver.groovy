@@ -24,11 +24,15 @@ class FixtureFilePatternResolver {
 	protected final grailsApplication
 	protected final applicationContext
 	protected final prefix
+    	protected final baseDir
 	
 	private FixtureFilePatternResolver(grailsApplication, applicationContext) {
 		this.grailsApplication = grailsApplication
 		this.applicationContext = applicationContext
 		this.prefix = (grailsApplication.warDeployed) ? "" : "file:"
+  		this.baseDir =  (!grailsApplication.warDeployed &&
+                	grailsApplication.config.grails.plugin.fixtures.rootDirectory  ) ? "${grailsApplication.config.grails.plugin.fixtures.rootDirectory}/" : ""
+
 	}
 
 	Resource[] resolve(String locationPattern) {
@@ -36,7 +40,8 @@ class FixtureFilePatternResolver {
 		def resolver = new ServletContextResourcePatternResolver(grailsApplication.mainContext.servletContext)
 		
 		try {
-			resources = resolver.getResources("${prefix}fixtures/${locationPattern}.groovy")
+			resources = resolver.getResources("${prefix}${baseDir}fixtures/${locationPattern}.groovy")
+
 		} catch (Exception e) {
 			throw new UnknownFixtureException(locationPattern, e)
 		}
